@@ -1,0 +1,63 @@
+databases:
+  - name: refract-db
+    databaseName: refract
+    plan: free
+
+services:
+  # Django + Daphne (ASGI — handles HTTP and WebSocket)
+  - type: web
+    name: refract-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: >
+      pip install -r requirements.txt &&
+      python manage.py collectstatic --no-input &&
+      python manage.py migrate --no-input
+    startCommand: daphne -b 0.0.0.0 -p $PORT refract.asgi:application
+    plan: free
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: refract.settings.prod
+      - key: DATABASE_URL
+        fromDatabase:
+          name: refract-db
+          property: connectionString
+      - key: REDIS_URL
+        sync: false   # paste your Upstash Redis URL here in Render dashboard
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false   # set manually in Render dashboard
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false   # set to your GitHub Pages URL, e.g. https://yourusername.github.io
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+
+  # Celery worker
+  - type: worker
+    name: refract-celery
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A refract worker -l info --concurrency=2
+    plan: free
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: refract.settings.prod
+      - key: DATABASE_URL
+        fromDatabase:
+          name: refract-db
+          property: connectionString
+      - key: REDIS_URL
+        sync: false
+      - key: SECRET_KEY
+        fromService:
+          name: refract-backend
+          type: web
+          envVarKey: SECRET_KEY
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: PYTHON_VERSION
+        value: "3.12.0"

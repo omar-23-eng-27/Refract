@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Refract</title>
+    <script>
+      // GitHub Pages SPA redirect trick.
+      // Encodes the path into a query string so index.html receives it,
+      // then a script in index.html decodes it back to the real path.
+      var path = window.location.pathname;
+      var base = '/';
+      var pathAfterBase = path.slice(base.length);
+      var search = window.location.search.slice(1);
+      var hash = window.location.hash;
+      var redirectUrl =
+        window.location.origin +
+        base +
+        '?p=' +
+        encodeURIComponent(pathAfterBase + (search ? '&' + search : '') + hash);
+      window.location.replace(redirectUrl);
+    </script>
+  </head>
+</html>

@@ -1,0 +1,4 @@
+{
+  "_comment": "Frontend is deployed to GitHub Pages via .github/workflows/deploy-frontend.yml. This file is kept as a fallback if you prefer Vercel.",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
