@@ -23,41 +23,16 @@ services:
           name: refract-db
           property: connectionString
       - key: REDIS_URL
-        sync: false   # paste your Upstash Redis URL here in Render dashboard
+        sync: false
       - key: SECRET_KEY
         generateValue: true
       - key: ANTHROPIC_API_KEY
-        sync: false   # set manually in Render dashboard
+        sync: false
       - key: ALLOWED_HOSTS
         value: .onrender.com
       - key: CORS_ALLOWED_ORIGINS
-        sync: false   # set to your GitHub Pages URL, e.g. https://yourusername.github.io
-      - key: PYTHON_VERSION
-        value: "3.12.0"
-
-  # Celery worker
-  - type: worker
-    name: refract-celery
-    runtime: python
-    rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: celery -A refract worker -l info --concurrency=2
-    plan: free
-    envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: refract.settings.prod
-      - key: DATABASE_URL
-        fromDatabase:
-          name: refract-db
-          property: connectionString
-      - key: REDIS_URL
         sync: false
-      - key: SECRET_KEY
-        fromService:
-          name: refract-backend
-          type: web
-          envVarKey: SECRET_KEY
-      - key: ANTHROPIC_API_KEY
-        sync: false
+      - key: CELERY_TASK_ALWAYS_EAGER
+        value: "True"
       - key: PYTHON_VERSION
         value: "3.12.0"
